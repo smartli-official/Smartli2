@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartli | Tasks</title>
+    <link rel="icon" type="image/png" href="assets/images/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Theme Loader (Prevents flicker) -->
+    <script src="theme-loader.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="tasks.css">
+</head>
+
+<body class="dashboard-body">
+
+    <div class="dashboard-container">
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <img src="assets/images/logo.png" alt="Smartli"><span class="brand-text">Smartli</span>
+            </div>
+
+            <nav class="nav-menu">
+                <div class="nav-item">
+                    <a href="dashboard.html" class="nav-link">
+                        <i class="ph ph-house"></i>
+                        <span>Home</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="tasks.html" class="nav-link active">
+                        <i class="ph ph-kanban"></i>
+                        <span>Tasks</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="focus.html" class="nav-link">
+                        <i class="ph ph-timer"></i>
+                        <span>Focus Hub</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="ai.html" class="nav-link">
+                        <i class="ph ph-robot"></i>
+                        <span>AI Tools</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="contact.html" class="nav-link">
+                        <i class="ph ph-envelope"></i>
+                        <span>Contact Us</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="pricing.html" class="nav-link">
+                    <i class="ph ph-currency-dollar"></i>
+                    <span>Your Plan</span>
+                </a>
+                <a href="settings.html" class="nav-link">
+                    <i class="ph ph-gear"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-link" onclick="handleLogout()">
+                    <i class="ph ph-sign-out"></i>
+                    <span>Log Out</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-viewport tasks-viewport">
+            <div class="tasks-container">
+                <!-- Left Panel: Task Management -->
+                <div class="tasks-panel left-panel">
+                    <header class="panel-header">
+                        <h2>Task Management</h2>
+                    </header>
+
+                    <!-- Quick Stats -->
+                    <div class="task-stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-tasks">0</div>
+                            <div class="stat-label">Total Tasks</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="pending-tasks">0</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="completed-tasks">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                    </div>
+
+                    <!-- Task Filters -->
+                    <div class="filter-section">
+                        <h3>Filter Tasks</h3>
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" onclick="filterTasks('all')">All Tasks</button>
+                            <button class="filter-btn" onclick="filterTasks('pending')">Pending</button>
+                            <button class="filter-btn" onclick="filterTasks('completed')">Completed</button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <button class="action-btn primary" onclick="openNewTaskPanel()">
+                            <i class="ph ph-plus"></i>
+                            <span>Create New Task</span>
+                        </button>
+                        <button type="button" class="action-btn secondary" id="clear-completed-btn" disabled>
+                            <i class="ph ph-trash"></i>
+                            <span>Clear Completed</span>
+                        </button>
+                    </div>
+
+                    <!-- Task Progress -->
+                    <div class="progress-section">
+                        <h3>Today's Progress</h3>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span id="progress-text">0 of 0 tasks completed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Task List -->
+                <div class="tasks-panel right-panel">
+                    <header class="panel-header">
+                        <div class="panel-title">
+                            <h2>Your Tasks</h2>
+                            <div class="task-sort">
+                                <select id="sort-select" onchange="sortTasks(this.value)">
+                                    <option value="created">Newest First</option>
+                                    <option value="due">Due Date</option>
+                                    <option value="priority">Priority</option>
+                                    <option value="subject">Subject</option>
+                                </select>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div id="tasks-list" class="tasks-grid">
+                        <!-- Tasks will be dynamically inserted here -->
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="ph ph-clipboard-text"></i>
+                            </div>
+                            <h3>No tasks yet</h3>
+                            <p>Create your first task to get started with organized studying</p>
+                            <button class="action-btn primary" onclick="openNewTaskPanel()">
+                                <i class="ph ph-plus"></i>
+                                <span>Create Task</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Task Overlay -->
+            <div id="new-task-overlay" class="task-overlay hidden">
+                <div class="overlay-backdrop" onclick="closeNewTaskPanel()"></div>
+                <div class="overlay-card">
+                    <div class="overlay-header">
+                        <h3>Create New Task</h3>
+                        <button class="overlay-close" onclick="closeNewTaskPanel()">
+                            <i class="ph ph-x"></i>
+                        </button>
+                    </div>
+
+                    <form id="new-task-form" class="task-form">
+                        <div class="form-section">
+                            <label for="task-name" class="form-label">Task Name</label>
+                            <input type="text" id="task-name" name="task-name"
+                                placeholder="e.g. Revise Quadratic Equations" class="form-input" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-section">
+                                <label for="task-time" class="form-label">Estimated Time</label>
+                                <select id="task-time" name="task-time" class="form-select" required>
+                                    <option value="">Select time</option>
+                                    <option value="15">15 minutes</option>
+                                    <option value="30">30 minutes</option>
+                                    <option value="60">1 hour</option>
+                                    <option value="90">1.5 hours</option>
+                                    <option value="120">2 hours</option>
+                                </select>
+                            </div>
+
+                            <div class="form-section">
+                                <label for="task-priority" class="form-label">Priority</label>
+                                <select id="task-priority" name="task-priority" class="form-select">
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <label class="form-label">Subject</label>
+                            <div class="subject-grid">
+                                <button type="button" class="subject-chip" data-subject="Mathematics">
+                                    <i class="ph ph-calculator"></i>
+                                    <span>Mathematics</span>
+                                </button>
+                                <button type="button" class="subject-chip" data-subject="Physics">
+                                    <i class="ph ph-atom"></i>
+                                    <span>Physics</span>
+                                </button>
+                                <button type="button" class="subject-chip" data-subject="Chemistry">
+                                    <i class="ph ph-flask"></i>
+                                    <span>Chemistry</span>
+                                </button>
+                                <button type="button" class="subject-chip" data-subject="Biology">
+                                    <i class="ph ph-dna"></i>
+                                    <span>Biology</span>
+                                </button>
+                                <button type="button" class="subject-chip" data-subject="Computer Science">
+                                    <i class="ph ph-code"></i>
+                                    <span>Computer Science</span>
+                                </button>
+                                <button type="button" class="subject-chip" data-subject="Economics">
+                                    <i class="ph ph-chart-line"></i>
+                                    <span>Economics</span>
+                                </button>
+                                <button type="button" class="subject-chip" data-subject="Other">
+                                    <i class="ph ph-dots-three"></i>
+                                    <span>Other</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="task-subject" name="task-subject" required>
+                        </div>
+
+                        <div class="form-section">
+                            <label for="task-description" class="form-label">Description (Optional)</label>
+                            <textarea id="task-description" name="task-description"
+                                placeholder="Add more details about this task..." class="form-textarea"
+                                rows="3"></textarea>
+                        </div>
+
+                        <div class="overlay-actions">
+                            <button type="button" class="btn-cancel" onclick="closeNewTaskPanel()">Cancel</button>
+                            <button type="submit" class="btn-confirm">Create Task</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Clear Completed Overlay -->
+            <div id="clear-completed-overlay" class="task-overlay hidden">
+                <div class="overlay-backdrop" onclick="closeClearCompletedPanel()"></div>
+                <div class="overlay-card clear-completed-card">
+                    <div class="overlay-header">
+                        <h3>Clear Completed</h3>
+                        <button type="button" class="overlay-close" onclick="closeClearCompletedPanel()">
+                            <i class="ph ph-x"></i>
+                        </button>
+                    </div>
+
+                    <p class="clear-completed-subtitle">Select the completed tasks you want to remove.</p>
+
+                    <label class="clear-select-all">
+                        <input type="checkbox" id="clear-select-all">
+                        <span>Select all</span>
+                    </label>
+
+                    <div id="clear-completed-list" class="clear-completed-list"></div>
+
+                    <div class="overlay-actions">
+                        <button type="button" class="btn-cancel" onclick="closeClearCompletedPanel()">Cancel</button>
+                        <button type="button" class="btn-confirm" id="clear-selected-btn" disabled>
+                            Clear Selected
+                        </button>
+                    </div>
+
+                    <button type="button" class="btn-clear-all" id="clear-all-completed-btn">
+                        Clear All Completed
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="script.js"></script>
+    <script src="tasks.js"></script>
+</body>
+
+</html>
