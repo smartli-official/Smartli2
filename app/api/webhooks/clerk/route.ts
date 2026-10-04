@@ -134,11 +134,23 @@ export async function POST(req: Request) {
     }
 
     const body = await req.text();
-    const evt = wh.verify(body, {
-      "svix-id": svixId,
-      "svix-timestamp": svixTimestamp,
-      "svix-signature": svixSignature,
-    }) as unknown as WebhookEvent;
+    // svix v2 `verify()` returns void and throws on invalid signatures —
+    // it does NOT return the payload (v1 API did). Parse separately.
+    try {
+      wh.verify(body, {
+        "svix-id": svixId,
+        "svix-timestamp": svixTimestamp,
+        "svix-signature": svixSignature,
+      });
+    } catch {
+      return new Response("Invalid webhook signature", { status: 400 });
+    }
+    let evt: WebhookEvent;
+    try {
+      evt = JSON.parse(body) as WebhookEvent;
+    } catch {
+      return new Response("Invalid webhook payload", { status: 400 });
+    }
 
     const eventType = evt.type;
 
@@ -162,7 +174,9 @@ export async function POST(req: Request) {
 
     return new Response("OK", { status: 200 });
   } catch (err) {
-    console.error("Webhook error:", err);
-    return new Response("Webhook verification failed", { status: 400 });
+    // Post-verification handler failure (e.g. Supabase down) — 500 so
+    // Clerk retries instead of dropping the event.
+    console.error("Webhook handler error:", err);
+    return new Response("Webhook handler failed", { status: 500 });
   }
 }

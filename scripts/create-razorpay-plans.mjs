@@ -1,5 +1,5 @@
 /**
- * One-time setup: create the 4 Smartli billing Plans on Razorpay (TEST mode).
+ * One-time setup: create the 4 Smartli billing Plans on Razorpay.
  *
  * Razorpay Subscriptions always bill through a Plan object (fixed amount +
  * interval), so one Plan is needed per (paid tier x billing period):
@@ -13,9 +13,9 @@
  *   node scripts/create-razorpay-plans.mjs
  *
  * Reads RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET from the environment (or
- * .env.local). Because those are TEST keys, the plans are created in test
- * mode. Live mode needs its own 4 plans later — re-run with live keys and
- * store the resulting IDs separately.
+ * .env.local). TEST keys create test-mode plans, LIVE keys create live-mode
+ * plans (real billing). Run once per mode and store the resulting IDs
+ * separately.
  *
  * Idempotent: existing plans tagged with our notes are reused, never
  * duplicated. Prints the .env block to append at the end.
@@ -47,9 +47,15 @@ if (!keyId || !secret) {
   console.error('Missing RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET (env or .env.local).');
   process.exit(1);
 }
-if (!keyId.startsWith('rzp_test_')) {
-  console.error(`Refusing: ${keyId} is not a TEST key. This script only creates test-mode plans.`);
+const isLive = keyId.startsWith('rzp_live_');
+const isTest = keyId.startsWith('rzp_test_');
+if (!isLive && !isTest) {
+  console.error(`Refusing: ${keyId} is neither a TEST nor a LIVE key.`);
   process.exit(1);
+}
+const modeLabel = isLive ? 'live' : 'test';
+if (isLive) {
+  console.log('Live key detected — creating LIVE-mode plans (real billing).');
 }
 
 // Canonical INR prices in paise — must match lib/plan/pricing.ts.
@@ -104,7 +110,7 @@ for (const w of WANT) {
       name: w.name,
       amount: w.amount,
       currency: 'INR',
-      description: `${w.name} — Smartli recurring subscription (test mode)`,
+      description: `${w.name} — Smartli recurring subscription (${modeLabel} mode)`,
     },
     notes: { smartli_plan: w.planId, billing: w.billing, managed_by: 'smartli-setup' },
   });
